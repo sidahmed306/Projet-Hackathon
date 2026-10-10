@@ -27,10 +27,12 @@ Base URL (local development): `http://localhost:8000`
 | `VALIDATION_ERROR` | 400 | The request JSON is missing a field or has a wrong value |
 | `PRODUCT_NOT_FOUND` | 404 | The `product_id` does not exist in the catalog |
 | `ORDER_NOT_FOUND` | 404 | The order does not exist |
+| `NOT_FOUND` | 404 | The route (URL) does not exist |
 | `MANDATE_EXCEEDED` | 422 | The total is above the mandate's `max_budget` |
 | `CATEGORY_MISMATCH` | 422 | The product is not in the mandate's category |
 | `AI_UNAVAILABLE` | 503 | The AI provider failed or is rate limited |
 | `PAYPAL_ERROR` | 502 | PayPal returned an error or could not be reached |
+| `HTTP_ERROR` | 4xx | Other HTTP errors, for example 405 when the method is not allowed |
 | `INTERNAL_ERROR` | 500 | Unexpected server error |
 
 ### The mandate object
