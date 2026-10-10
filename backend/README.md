@@ -19,11 +19,17 @@ pip install -r requirements.txt
 # 4. Create your .env at the project root (only the first time), then fill in your values
 cp -n ../.env.example ../.env
 
-# 5. Run the tests
+# 5. (Optional) Load the demo catalog into backend/app.db
+#    The server also does this automatically on startup when the table is empty.
+#    Safe to run again after editing data/products.json: no duplicates.
+python -m app.seed
+
+# 6. Run the tests (they use a temporary database, never app.db)
 pytest
 
-# 6. Start the server (stop it with Ctrl+C)
+# 7. Start the server (stop it with Ctrl+C)
 uvicorn app.main:app --port 8000 --reload
 ```
 
 Then open http://localhost:8000/docs to see and try the API, or http://localhost:8000/api/health to check that it runs.
+Try the catalog at http://localhost:8000/api/products?category=laptop&max_price=800.00
