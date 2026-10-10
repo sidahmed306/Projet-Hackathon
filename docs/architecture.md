@@ -31,7 +31,7 @@ flowchart LR
 1. **Chat and mandate.** The user describes what they want. The AI extracts the mandate and suggests up to 3 products (`POST /api/chat`).
 2. **Quote.** The user picks a product. The server reads the price from SQLite and returns a detailed quote (`POST /api/quote`).
 3. **Create order.** The user clicks "Pay with PayPal". The server recalculates the total, checks it against the mandate (refuses with `MANDATE_EXCEEDED` if too high) and creates a PayPal order (`POST /api/orders`).
-4. **User approval.** The PayPal window opens. The user logs in to a Sandbox account and approves (or cancels). Nothing is paid without this click.
+4. **User approval.** The PayPal window opens. The user logs in to a Sandbox account and approves (or cancels). If the user cancels or closes the window, the browser calls `POST /api/orders/{paypal_order_id}/cancel`. Nothing is paid without this click.
 5. **Capture and confirmation.** The server captures the payment, checks the real status with PayPal and saves it (`POST /api/orders/{paypal_order_id}/capture`). The browser shows the result (`GET /api/orders/{order_id}`).
 
 ```mermaid

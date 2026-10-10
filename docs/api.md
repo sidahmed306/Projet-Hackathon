@@ -230,7 +230,7 @@ The frontend then opens the PayPal window with `paypal_order_id`. No money moves
 }
 ```
 
-- `status`: `"COMPLETED"`, `"PENDING"` or `"FAILED"`, as verified by the server with PayPal.
+- `status`: `"COMPLETED"`, `"PENDING"`, `"FAILED"` or `"CANCELLED"`, as verified by the server with PayPal.
 
 **Errors:** `ORDER_NOT_FOUND`, `PAYPAL_ERROR`.
 
@@ -255,8 +255,27 @@ The frontend then opens the PayPal window with `paypal_order_id`. No money moves
 }
 ```
 
-- `status`: `"CREATED"`, `"COMPLETED"`, `"PENDING"` or `"FAILED"`.
+- `status`: `"CREATED"`, `"COMPLETED"`, `"PENDING"`, `"FAILED"` or `"CANCELLED"`.
 - `created_at`: ISO 8601 date in UTC.
+
+**Errors:** `ORDER_NOT_FOUND`.
+
+---
+
+## h. POST /api/orders/{paypal_order_id}/cancel
+
+**Purpose:** mark an order as cancelled when the user closed or cancelled the PayPal window.
+
+**Request example:** `POST /api/orders/5O190127TN364715T/cancel` (no body).
+
+**Success response (200):**
+
+```json
+{
+  "order_id": "ord_0001",
+  "status": "CANCELLED"
+}
+```
 
 **Errors:** `ORDER_NOT_FOUND`.
 
@@ -268,3 +287,5 @@ The frontend then opens the PayPal window with `paypal_order_id`. No money moves
 2. **The server never trusts AI output for amounts.** The AI may suggest products, but every price and total is recalculated by the server.
 3. **Payment capture only happens after the user approves** in the PayPal window. The AI cannot create, approve or capture a payment.
 4. **Secrets only live in `.env` on the server.** PayPal secret and Gemini key are never sent to the browser and never committed to Git.
+5. **Idempotency.** The same create or capture request sent twice (double click, network retry) must not create two orders or two payments. The server uses PayPal's request ID header for this.
+6. **The server verifies the captured amount.** After capture, the server checks that the captured amount and currency returned by PayPal are exactly equal to the order total stored in the database. If not, the order is marked `FAILED`.

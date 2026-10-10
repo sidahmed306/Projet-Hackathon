@@ -18,7 +18,7 @@ The server enforces the mandate and recalculates every price. Payment goes throu
 ## Folder structure
 
 ```
-ai-payment-agent/
+Projet-Hackathon/
 ├── README.md          Project overview (this file)
 ├── LICENSE            MIT license
 ├── .gitignore         Files Git must never track
