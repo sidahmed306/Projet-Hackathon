@@ -48,6 +48,13 @@ def test_category_filter(client, category, expected):
     assert all(p["category"] == category for p in products)
 
 
+@pytest.mark.parametrize("category", ["laptop", "LAPTOP", " Laptop "])
+def test_category_is_normalized(client, category):
+    products = client.get("/api/products", params={"category": category}).json()
+    assert len(products) == 5
+    assert all(p["category"] == "laptop" for p in products)
+
+
 def test_unknown_category_returns_empty_list(client):
     response = client.get("/api/products", params={"category": "car"})
     assert response.status_code == 200

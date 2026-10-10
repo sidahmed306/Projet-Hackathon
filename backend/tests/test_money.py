@@ -16,6 +16,9 @@ from app.money import from_cents, to_cents
         ("0", 0),
         ("0.00", 0),
         ("1899.00", 189900),
+        ("799.5", 79950),
+        ("0.99", 99),
+        (" 799.00 ", 79900),  # spaces around are stripped
     ],
 )
 def test_to_cents_valid(text, cents):
@@ -24,7 +27,11 @@ def test_to_cents_valid(text, cents):
 
 @pytest.mark.parametrize(
     "text",
-    ["-5", "-0.01", "10.999", "0.001", "abc", "", "12,50", "NaN", "Infinity", "1.2.3"],
+    [
+        "-5", "-0.01", "-1", "10.999", "0.001", "abc", "", "   ", "12,50", "799,00",
+        "NaN", "Infinity", "1.2.3", "1e2", "1E-2", "1_000", "+5", "5.", ".5",
+        "٧٩٩",  # Arabic-Indic digits: not plain ASCII digits
+    ],
 )
 def test_to_cents_rejects_invalid(text):
     with pytest.raises(ValueError):

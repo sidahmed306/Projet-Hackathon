@@ -33,6 +33,8 @@ def list_products(category: Optional[str] = None, max_price: Optional[str] = Non
     sql = "SELECT * FROM products WHERE 1 = 1"
     params = []
 
+    # " Laptop " and "LAPTOP" are treated like "laptop".
+    category = (category or "").strip().lower()
     if category:
         sql += " AND category = ?"
         params.append(category)
