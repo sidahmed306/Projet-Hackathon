@@ -1,0 +1,110 @@
+[
+  {
+    "id": "prod_001",
+    "name": "DemoBook Air 13",
+    "category": "laptop",
+    "description": "Light 13-inch laptop, 16 GB RAM, 512 GB SSD.",
+    "price": "749.00",
+    "shipping": "15.00",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_002",
+    "name": "Quorix Student 14",
+    "category": "laptop",
+    "description": "14-inch laptop with an 8-core processor, 16 GB RAM, 256 GB SSD and 10-hour battery.",
+    "price": "579.00",
+    "shipping": "12.00",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_003",
+    "name": "Calyra Pro 15",
+    "category": "laptop",
+    "description": "15.6-inch laptop with a 12-core processor, 32 GB RAM, 1 TB SSD and dedicated 8 GB graphics.",
+    "price": "1249.00",
+    "shipping": "0.00",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_004",
+    "name": "Tessly Flex 14",
+    "category": "laptop",
+    "description": "14-inch 2-in-1 touchscreen laptop, 16 GB RAM, 512 GB SSD, weighs 1.3 kg.",
+    "price": "799.00",
+    "shipping": "10.00",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_005",
+    "name": "Orvanta Studio 16",
+    "category": "laptop",
+    "description": "16-inch laptop with a 3K display, 64 GB RAM, 2 TB SSD and 12 GB graphics card.",
+    "price": "1899.00",
+    "shipping": "25.00",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_006",
+    "name": "Brivo Pulse ANC",
+    "category": "headphones",
+    "description": "Over-ear wireless headphones with active noise cancelling and 30-hour battery.",
+    "price": "129.00",
+    "shipping": "6.50",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_007",
+    "name": "Brivo Lite Buds",
+    "category": "headphones",
+    "description": "True wireless earbuds with 6-hour battery, charging case and IPX4 splash resistance.",
+    "price": "39.99",
+    "shipping": "4.99",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_008",
+    "name": "Kelvane Studio Monitor",
+    "category": "headphones",
+    "description": "Wired closed-back studio headphones with 50 mm drivers and a detachable 3 m cable.",
+    "price": "219.00",
+    "shipping": "9.00",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_009",
+    "name": "Kelvane Sport Wireless",
+    "category": "headphones",
+    "description": "Neckband sport earphones with Bluetooth 5.3, 12-hour battery and sweat resistance.",
+    "price": "79.50",
+    "shipping": "5.00",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_010",
+    "name": "Lumyra One",
+    "category": "phone",
+    "description": "6.1-inch smartphone with 8 GB RAM, 128 GB storage, 50 MP camera and 4500 mAh battery.",
+    "price": "349.00",
+    "shipping": "8.00",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_011",
+    "name": "Lumyra One Max",
+    "category": "phone",
+    "description": "6.7-inch 120 Hz smartphone with 12 GB RAM, 256 GB storage and triple 50 MP camera.",
+    "price": "699.00",
+    "shipping": "8.00",
+    "currency": "USD"
+  },
+  {
+    "id": "prod_012",
+    "name": "Vexo Mini 5G",
+    "category": "phone",
+    "description": "Compact 5.4-inch 5G smartphone with 6 GB RAM, 128 GB storage and 3800 mAh battery.",
+    "price": "229.00",
+    "shipping": "7.50",
+    "currency": "USD"
+  }
+]
