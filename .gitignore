@@ -1,0 +1,30 @@
+# --- Python ---
+venv/
+.venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# --- Node ---
+node_modules/
+dist/
+
+# --- Environment files (secrets) ---
+.env
+.env.*
+!.env.example
+
+# --- SQLite databases ---
+*.db
+*.sqlite3
+
+# --- macOS ---
+.DS_Store
+
+# --- Windows ---
+Thumbs.db
+
+# --- Editors ---
+.vscode/
+.idea/
