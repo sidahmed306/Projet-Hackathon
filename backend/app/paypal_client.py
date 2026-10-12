@@ -88,18 +88,32 @@ def _send(request_kwargs: dict, action: str) -> dict:
 
 
 def _log_paypal_error(response: httpx.Response, action: str) -> None:
-    """Log only the status, the error name and the debug_id (never the full body)."""
+    """Log only the status, the error name, the debug_id and the first detail
+    (issue + description, for example ORDER_NOT_APPROVED). Never the full body."""
     name = None
     debug_id = response.headers.get("PayPal-Debug-Id")
+    issue = None
+    description = None
     try:
         body = response.json()
         # Orders API errors use "name"; OAuth errors use "error".
         name = body.get("name") or body.get("error")
         debug_id = body.get("debug_id") or debug_id
+        # The precise reason is in details[0]: {"issue": "...", "description": "..."}.
+        details = body.get("details")
+        if isinstance(details, list) and details and isinstance(details[0], dict):
+            issue = details[0].get("issue")
+            description = details[0].get("description")
     except (ValueError, AttributeError):
         pass
     logger.warning(
-        "PayPal %s failed: status=%s name=%s debug_id=%s", action, response.status_code, name, debug_id
+        "PayPal %s failed: status=%s name=%s debug_id=%s issue=%s description=%s",
+        action,
+        response.status_code,
+        name,
+        debug_id,
+        issue,
+        description,
     )
 
 

@@ -240,6 +240,43 @@ def test_error_log_has_status_name_and_debug_id(monkeypatch, paypal_settings, ca
     assert "dbg123" in caplog.text
 
 
+def test_error_log_has_issue_and_description(monkeypatch, paypal_settings, caplog):
+    body = {
+        "name": "UNPROCESSABLE_ENTITY",
+        "message": "The requested action could not be performed.",
+        "debug_id": "dbg456",
+        "details": [
+            {
+                "issue": "ORDER_NOT_APPROVED",
+                "description": "Payer has not yet approved the Order for payment.",
+                "field": "some-field-value-that-must-not-be-logged",
+            }
+        ],
+        "links": [{"href": "https://example.invalid/should-not-be-logged", "rel": "information_link"}],
+    }
+    fake = FakePayPal({("POST", "/v2/checkout/orders/ABC123/capture"): lambda r: httpx.Response(422, json=body)})
+    install(monkeypatch, fake)
+
+    with caplog.at_level(logging.WARNING, logger="app.paypal_client"):
+        with pytest.raises(ApiError):
+            paypal_client.capture_order("ABC123", "cap-req-1")
+    assert "issue=ORDER_NOT_APPROVED" in caplog.text
+    assert "Payer has not yet approved the Order for payment." in caplog.text
+    assert "dbg456" in caplog.text
+    # Only the chosen fields are logged, never the full body.
+    assert "some-field-value-that-must-not-be-logged" not in caplog.text
+    assert "should-not-be-logged" not in caplog.text
+
+
+def test_error_log_without_details(monkeypatch, paypal_settings, caplog):
+    fake = FakePayPal({("POST", "/v2/checkout/orders"): lambda r: httpx.Response(500, json={"details": "weird"})})
+    install(monkeypatch, fake)
+    with caplog.at_level(logging.WARNING, logger="app.paypal_client"):
+        with pytest.raises(ApiError):
+            paypal_client.create_order(100, "USD", "ord_1", "req-1")
+    assert "issue=None" in caplog.text
+
+
 @pytest.mark.parametrize("network_error", [httpx.ReadTimeout, httpx.ConnectTimeout, httpx.ConnectError])
 def test_timeout_and_network_errors_become_paypal_error(monkeypatch, paypal_settings, network_error):
     def fail(request):

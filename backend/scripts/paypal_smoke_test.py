@@ -2,6 +2,7 @@
 
 Run from backend/ (with the venv active):
     python -m scripts.paypal_smoke_test                    # create a 1.00 USD order
+    python -m scripts.paypal_smoke_test --status ORDER_ID  # show the order status
     python -m scripts.paypal_smoke_test --capture ORDER_ID # capture it after approval
 
 It uses PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET from the .env at the project root.
@@ -41,9 +42,18 @@ def capture(order_id: str) -> None:
     print(f"Captured amount: {result['captured_value']} {result['captured_currency']}")
 
 
+def status(order_id: str) -> None:
+    order = paypal_client.get_order(order_id)
+    print(f"PayPal order id: {order['id']}")
+    print(f"Order status:    {order['status']}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="PayPal Sandbox smoke test")
-    parser.add_argument("--capture", metavar="ORDER_ID", help="capture an approved order")
+    # Only one of the two options at a time.
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--capture", metavar="ORDER_ID", help="capture an approved order")
+    group.add_argument("--status", metavar="ORDER_ID", help="show the status of an order")
     args = parser.parse_args()
 
     # Show the client's warnings (status, error name, debug_id only).
@@ -52,6 +62,8 @@ def main() -> int:
     try:
         if args.capture:
             capture(args.capture)
+        elif args.status:
+            status(args.status)
         else:
             create()
     except paypal_client.PayPalConfigError as error:
