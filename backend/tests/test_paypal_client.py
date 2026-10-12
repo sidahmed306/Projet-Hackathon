@@ -60,12 +60,13 @@ def install(monkeypatch, fake: FakePayPal):
     monkeypatch.setattr(paypal_client, "_transport", httpx.MockTransport(fake.handler))
 
 
+# With payment_source, PayPal answers PAYER_ACTION_REQUIRED and a "payer-action" link.
 CREATED_ORDER = {
     "id": "5O190127TN364715T",
-    "status": "CREATED",
+    "status": "PAYER_ACTION_REQUIRED",
     "links": [
         {"href": "https://api-m.sandbox.paypal.com/v2/checkout/orders/5O190127TN364715T", "rel": "self", "method": "GET"},
-        {"href": "https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T", "rel": "approve", "method": "GET"},
+        {"href": "https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T", "rel": "payer-action", "method": "GET"},
     ],
 }
 
@@ -154,12 +155,58 @@ def test_create_order_sends_amount_and_request_id(monkeypatch, paypal_settings):
         "purchase_units": [
             {"reference_id": "ord_0001", "amount": {"currency_code": "USD", "value": "764.00"}}
         ],
+        "payment_source": {
+            "paypal": {
+                "experience_context": {
+                    "return_url": "http://localhost:5173/checkout/return",
+                    "cancel_url": "http://localhost:5173/checkout/cancel",
+                    "user_action": "PAY_NOW",
+                    "shipping_preference": "NO_SHIPPING",
+                    "landing_page": "LOGIN",
+                    "brand_name": "AI Payment Agent",
+                }
+            }
+        },
     }
     assert result == {
         "paypal_order_id": "5O190127TN364715T",
-        "status": "CREATED",
+        "status": "PAYER_ACTION_REQUIRED",
         "approve_url": "https://www.sandbox.paypal.com/checkoutnow?token=5O190127TN364715T",
     }
+
+
+def test_return_and_cancel_urls_use_frontend_origin(monkeypatch, paypal_settings):
+    monkeypatch.setattr(
+        config, "settings", dataclasses.replace(paypal_settings, FRONTEND_ORIGIN="https://shop.example/")
+    )
+    fake = FakePayPal({("POST", "/v2/checkout/orders"): create_route})
+    install(monkeypatch, fake)
+
+    paypal_client.create_order(100, "USD", "ord_1", "req-1")
+
+    request = [r for r in fake.requests if r.url.path == "/v2/checkout/orders"][0]
+    context = json.loads(request.content)["payment_source"]["paypal"]["experience_context"]
+    assert context["return_url"] == "https://shop.example/checkout/return"
+    assert context["cancel_url"] == "https://shop.example/checkout/cancel"
+
+
+@pytest.mark.parametrize(
+    "links, expected",
+    [
+        # Both present: "payer-action" wins, whatever the order.
+        ([{"rel": "approve", "href": "A"}, {"rel": "payer-action", "href": "P"}], "P"),
+        # Only "approve": used as fallback.
+        ([{"rel": "self", "href": "S"}, {"rel": "approve", "href": "A"}], "A"),
+        # Neither: None.
+        ([{"rel": "self", "href": "S"}], None),
+    ],
+)
+def test_approve_url_prefers_payer_action(monkeypatch, paypal_settings, links, expected):
+    order = {"id": "X1", "status": "PAYER_ACTION_REQUIRED", "links": links}
+    fake = FakePayPal({("POST", "/v2/checkout/orders"): lambda r: httpx.Response(200, json=order)})
+    install(monkeypatch, fake)
+
+    assert paypal_client.create_order(100, "USD", "ord_1", "req-1")["approve_url"] == expected
 
 
 # --- Capture and get ---------------------------------------------------------
@@ -202,7 +249,10 @@ def test_get_order(monkeypatch, paypal_settings):
     )
     install(monkeypatch, fake)
 
-    assert paypal_client.get_order("5O190127TN364715T") == {"id": "5O190127TN364715T", "status": "CREATED"}
+    assert paypal_client.get_order("5O190127TN364715T") == {
+        "id": "5O190127TN364715T",
+        "status": "PAYER_ACTION_REQUIRED",
+    }
 
 
 def test_invalid_order_id_is_refused(monkeypatch, paypal_settings):

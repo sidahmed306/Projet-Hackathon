@@ -169,6 +169,7 @@ def create_order(total_cents: int, currency: str, reference_id: str, request_id:
 
     Returns {"paypal_order_id", "status", "approve_url"}.
     """
+    frontend = config.settings.FRONTEND_ORIGIN.rstrip("/")
     payload = {
         "intent": "CAPTURE",
         "purchase_units": [
@@ -177,6 +178,19 @@ def create_order(total_cents: int, currency: str, reference_id: str, request_id:
                 "amount": {"currency_code": currency, "value": from_cents(total_cents)},
             }
         ],
+        # How the PayPal approval page behaves, and where it sends the buyer back.
+        "payment_source": {
+            "paypal": {
+                "experience_context": {
+                    "return_url": f"{frontend}/checkout/return",
+                    "cancel_url": f"{frontend}/checkout/cancel",
+                    "user_action": "PAY_NOW",  # button says "Pay Now"
+                    "shipping_preference": "NO_SHIPPING",  # no shipping address asked
+                    "landing_page": "LOGIN",  # show the PayPal login page first
+                    "brand_name": "AI Payment Agent",
+                }
+            }
+        },
     }
     body = _send(
         {
@@ -188,12 +202,10 @@ def create_order(total_cents: int, currency: str, reference_id: str, request_id:
         action="create order",
     )
 
-    approve_url = None
-    for link in body.get("links", []):
-        # "approve" is the link where the buyer approves the payment.
-        if link.get("rel") in ("approve", "payer-action"):
-            approve_url = link.get("href")
-            break
+    # The buyer approves on this link. With payment_source PayPal names it
+    # "payer-action"; "approve" is kept as a fallback.
+    links = {link.get("rel"): link.get("href") for link in body.get("links", [])}
+    approve_url = links.get("payer-action") or links.get("approve")
 
     return {"paypal_order_id": body.get("id"), "status": body.get("status"), "approve_url": approve_url}
 
