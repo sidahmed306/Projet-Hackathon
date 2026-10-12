@@ -33,3 +33,19 @@ uvicorn app.main:app --port 8000 --reload
 
 Then open http://localhost:8000/docs to see and try the API, or http://localhost:8000/api/health to check that it runs.
 Try the catalog at http://localhost:8000/api/products?category=laptop&max_price=800.00
+
+## PayPal Sandbox smoke test
+
+This calls the **real PayPal Sandbox** (test money only) with the credentials in `../.env`
+(`PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, `PAYPAL_API_BASE=https://api-m.sandbox.paypal.com`).
+It never prints the token or the secret. The automated tests never call PayPal.
+
+```bash
+# 1. Create a 1.00 USD order: prints the order id, its status and an approve URL
+python -m scripts.paypal_smoke_test
+
+# 2. Open the approve URL, log in with a Sandbox *personal* account and approve
+
+# 3. Capture the approved order
+python -m scripts.paypal_smoke_test --capture ORDER_ID
+```
